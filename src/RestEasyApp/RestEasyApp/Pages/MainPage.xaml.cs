@@ -23,7 +23,11 @@ namespace RestEasyApp
 
 		/*private bool Count()
 		{
-			lblHR.Text = $"{++Counter}";
+			/*var sb = new StringBuilder();
+			foreach (var data in Global.Database.AllData)
+			{
+				sb.AppendLine($"{data.Date}, HR = {data.HR}, RR = {data.RR}, SPO2 = {data.SPO2}, Alarm: {data.Alarm}");
+			}
 
 			return Counter < 10;
 		}*/
@@ -54,9 +58,86 @@ namespace RestEasyApp
 			});
 		}
 
-		private void bUse_OnClicked(object sender, EventArgs e)
+		private void SetAlarm()
 		{
-			DisplayAlert("", "Use", "OK");
+			var latestData = Global.Database.GetLatestData;
+			if (Global.Database.GetLatestData.Alarm)
+			{
+
+				lblAlarm.Text = $"Last alarm: {Format_Time(latestData.Date)}";
+
+				if (!notificationSent)
+				{
+					int id = 0;
+					string title = "Exacerbation Alert";
+					string body = string.Join(", ", GetLines());
+
+					CrossLocalNotifications.Current.Show(title, body, id);
+					notificationSent = true;
+
+					imgAlarm.Source = "AlarmRed.png";
+
+
+					IEnumerable<string> GetLines()
+					{
+						var alarm = Global.Database.GetLastAlarm;
+						yield return $"Time: {alarm.Date}";
+						yield return $"HR: {alarm.HR}";
+						yield return $"RR: {alarm.RR}";
+						yield return $"SPO2: {alarm.SPO2}";
+					}
+				}
+			}
+		}
+
+		private static string Format_Time(DateTime date)
+		{
+			return $"{date: MMMM dd, yyyy\nhh:mm tt}";
+		}
+
+		private void Stream_DataReceived(Data data)
+		{
+			bool alarm;
+			if (data.HR < minHR || data.HR > maxHR || data.RR < minRR || data.RR > maxRR || data.SPO2 < minSPO2)
+			{
+				alarm = true;
+			}
+			else
+			{
+				alarm = false;
+				notificationSent = false;
+			}
+
+			Global.Database.Add(new DB.Data
+			{
+				HR = data.HR,
+				RR = data.RR,
+				SPO2 = data.SPO2,
+				Date = DateTime.Now,
+				Alarm = alarm
+			});
+
+			Device.BeginInvokeOnMainThread(() =>
+			{
+				lblHR.Text = $"{data.HR} bpm";
+				lblRR.Text = $"{data.RR} breaths/min";
+				lblSPO2.Text = $"{data.SPO2}%";
+				SetAlarm();
+			});
+		}
+
+		private void BConnect_OnClicked(object sender, EventArgs e)
+		{
+			StartConnection();
+		}
+
+		private void BExacerbation_OnClicked(object sender, EventArgs e)
+		{
+
+		}
+		private void BAlarm_OnClicked(object sender, EventArgs e)
+		{
+			Navigation.PushModalAsync(new AlarmPage());
 		}
 	}
 }

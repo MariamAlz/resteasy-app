@@ -1,6 +1,5 @@
 ﻿using System;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace RestEasyApp
 {
@@ -9,6 +8,8 @@ namespace RestEasyApp
 		public App()
 		{
 			InitializeComponent();
+
+			Global.Init();
 
 			MainPage = new MainPage();
 		}
