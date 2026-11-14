@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using EasyTCP;
+using Plugin.LocalNotifications;
 using Xamarin.Forms;
 
 namespace RestEasyApp
 {
 	public partial class MainPage : ContentPage
 	{
-		//private int Counter = 0;
 		private DataStream Stream;
+		private const int minHR = 60, maxHR = 100, minRR = 12, maxRR = 20, minSPO2 = 95;
+		private bool notificationSent = false;
 
 		public MainPage()
 		{
 			InitializeComponent();
-			//Device.StartTimer(TimeSpan.FromSeconds(1), Count);
+			RetrieveData();
 		}
 
-		/*private bool Count()
+		protected override void OnAppearing()
 		{
 			/*var sb = new StringBuilder();
 			foreach (var data in Global.Database.AllData)
@@ -29,10 +27,12 @@ namespace RestEasyApp
 				sb.AppendLine($"{data.Date}, HR = {data.HR}, RR = {data.RR}, SPO2 = {data.SPO2}, Alarm: {data.Alarm}");
 			}
 
-			return Counter < 10;
-		}*/
+			DisplayAlert("", sb.ToString(), "OK");
 
-		private void bExacerbation_OnClicked(object sender, EventArgs e)
+			base.OnAppearing();*/
+		}
+
+		private void StartConnection()
 		{
 			try
 			{
@@ -47,15 +47,17 @@ namespace RestEasyApp
 			}
 
 		}
-
-		private void Stream_DataReceived(Data data)
+		private void RetrieveData()
 		{
-			Device.BeginInvokeOnMainThread(() =>
+			if (Global.Database.DataExists)
 			{
-				lblHR.Text = $"{data.HR}";
-				lblRR.Text = $"{data.RR}";
-				lblSPO2.Text = $"{data.SPO2}";
-			});
+				lblHR.Text = $"{Global.Database.GetLatestData.HR} bpm";
+				lblRR.Text = $"{Global.Database.GetLatestData.RR} breaths/min";
+				lblSPO2.Text = $"{Global.Database.GetLatestData.SPO2}%";
+
+				if (Global.Database.AlarmExists)
+					lblAlarm.Text = $"Last alarm: {Format_Time(Global.Database.GetLatestData.Date)}";
+			}
 		}
 
 		private void SetAlarm()
