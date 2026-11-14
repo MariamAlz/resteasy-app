@@ -4,7 +4,7 @@
 
 A cross-platform mobile app prototype for nighttime pediatric asthma monitoring. RestEasy started as a device and app idea from a group of George Washington University medical students. This was a team project with my internship mentor and another intern.
 
-**My work is on the [`Mariam`](https://github.com/MariamAlz/RestEasyApp/tree/Mariam) branch.**
+**This repository contains my internship work on the app.**
 
 ## Features
 
